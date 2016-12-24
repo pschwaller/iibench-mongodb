@@ -1,5 +1,9 @@
 #!/bin/bash
 
+export TESTNAME=$1
+
+export CLASSPATH=$PWD/mongo-java-driver-2.11.4.jar:$CLASSPATH
+
 # simple script to run against running MongoDB/TokuMX server localhost:(default port)
 
 # if running TokuMX, need to select compression for collection and secondary indexes (zlib is default)
@@ -16,7 +20,7 @@ export MAX_ROWS=100000000
 
 # run the benchmark for this many minutes (or the number of inserts defined by MAX_ROWS)
 #   valid values : intever > 0
-export RUN_MINUTES=60
+export RUN_MINUTES=600
 export RUN_SECONDS=$[RUN_MINUTES*60]
 
 # total number of documents to insert per "batch"
@@ -43,7 +47,7 @@ export WRITE_CONCERN=SAFE
 export MONGO_SERVER=localhost
 
 # port of the server to connect to
-export MONGO_PORT=27017
+export MONGO_PORT=40000
 
 # display performance information every time the client application inserts this many documents
 #   valid values : integer > 0, set to -1 if using NUM_SECONDS_PER_FEEDBACK
@@ -55,7 +59,7 @@ export NUM_SECONDS_PER_FEEDBACK=-1
 
 # number of additional character fields (semi-compressible) to add to each inserted document
 #   valid values : integer >= 0
-export NUM_CHAR_FIELDS=1
+export NUM_CHAR_FIELDS=10
 
 # size (in bytes) of each additional semi-compressible character field
 #   valid values : integer >= 0
@@ -73,7 +77,7 @@ export NUM_SECONDARY_INDEXES=3
 
 # number of queries to perform per QUERY_INTERVAL_SECONDS seconds
 #   valid values : integer > 0, set to zero for insert only workload
-export QUERIES_PER_INTERVAL=0
+export QUERIES_PER_INTERVAL=10
 
 # number of seconds during which to perform QUERIES_PER_INTERVAL queries
 #   valid values : integer > 0
@@ -91,18 +95,24 @@ export QUERY_NUM_DOCS_BEGIN=1000000
 #   valid values : Y/N
 export CREATE_COLLECTION=Y
 
+export QUERY_THREADS=0
+
+export QUERY_MS_INTERVAL=0
+
+export QUERY_INDEX_DIRECTION=1
+
 
 javac -cp $CLASSPATH:$PWD/src src/jmongoiibench.java
 
 
-export LOG_NAME=mongoiibench-${MAX_ROWS}-${NUM_DOCUMENTS_PER_INSERT}-${MAX_INSERTS_PER_SECOND}-${NUM_LOADER_THREADS}-${QUERIES_PER_INTERVAL}-${QUERY_INTERVAL_SECONDS}.txt
+export LOG_NAME=mongoiibench-${TESTNAME}-${MAX_ROWS}-${NUM_DOCUMENTS_PER_INSERT}-${MAX_INSERTS_PER_SECOND}-${NUM_LOADER_THREADS}-${QUERIES_PER_INTERVAL}-${QUERY_INTERVAL_SECONDS}.txt
 export BENCHMARK_TSV=${LOG_NAME}.tsv
-    
+
 rm -f $LOG_NAME
 rm -f $BENCHMARK_TSV
 
 T="$(date +%s)"
-java -cp $CLASSPATH:$PWD/src jmongoiibench $DB_NAME $NUM_LOADER_THREADS $MAX_ROWS $NUM_DOCUMENTS_PER_INSERT $NUM_INSERTS_PER_FEEDBACK $NUM_SECONDS_PER_FEEDBACK $BENCHMARK_TSV $MONGO_COMPRESSION $MONGO_BASEMENT $RUN_SECONDS $QUERIES_PER_INTERVAL $QUERY_INTERVAL_SECONDS $QUERY_LIMIT $QUERY_NUM_DOCS_BEGIN $MAX_INSERTS_PER_SECOND $WRITE_CONCERN $MONGO_SERVER $MONGO_PORT $NUM_CHAR_FIELDS $LENGTH_CHAR_FIELDS $NUM_SECONDARY_INDEXES $PERCENT_COMPRESSIBLE $CREATE_COLLECTION | tee -a $LOG_NAME
+java -cp $CLASSPATH:$PWD/src jmongoiibench $DB_NAME $NUM_LOADER_THREADS $MAX_ROWS $NUM_DOCUMENTS_PER_INSERT $NUM_INSERTS_PER_FEEDBACK $NUM_SECONDS_PER_FEEDBACK $BENCHMARK_TSV $MONGO_COMPRESSION $MONGO_BASEMENT $RUN_SECONDS $QUERY_LIMIT $QUERY_NUM_DOCS_BEGIN $MAX_INSERTS_PER_SECOND $WRITE_CONCERN $MONGO_SERVER $MONGO_PORT $NUM_CHAR_FIELDS $LENGTH_CHAR_FIELDS $NUM_SECONDARY_INDEXES $PERCENT_COMPRESSIBLE $CREATE_COLLECTION $QUERY_THREADS $QUERY_MS_INTERVAL $QUERY_INDEX_DIRECTION | tee -a $LOG_NAME
 echo "" | tee -a $LOG_NAME
 T="$(($(date +%s)-T))"
 printf "`date` | iibench duration = %02d:%02d:%02d:%02d\n" "$((T/86400))" "$((T/3600%24))" "$((T/60%60))" "$((T%60))" | tee -a $LOG_NAME

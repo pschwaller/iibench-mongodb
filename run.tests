@@ -1,0 +1,11 @@
+#!/bin/bash
+
+export DB_ROOT=/zfs-pool/iibench
+export TEST=rocks-small-2gb
+
+rm -rf ${DB_ROOT}/${TEST}
+mkdir ${DB_ROOT}/${TEST}
+mongod -f ${TEST}.conf --dbpath ${DB_ROOT}/${TEST}
+./run.simple.bash ${TEST}
+mongo < shutdown.js
+

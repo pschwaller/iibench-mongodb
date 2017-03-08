@@ -15,6 +15,7 @@ import java.util.Arrays;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.Properties;
+import java.util.UUID;
 import java.io.BufferedWriter;
 import java.io.FileWriter;
 import java.io.File;
@@ -417,7 +418,7 @@ public class jmongoiibench {
                         int thisCustomerId = rand.nextInt(numCustomers);
                         double thisPrice= ((rand.nextDouble() * maxPrice) + (double) thisCustomerId) / 100.0;
                         BasicDBObject doc = new BasicDBObject();
-                        //doc.put("_id",id);
+                        doc.put("_id", java.util.UUID.randomUUID().toString());
                         doc.put("dateandtime", System.currentTimeMillis());
                         doc.put("cashregisterid", rand.nextInt(numCashRegisters));
                         doc.put("customerid", thisCustomerId);

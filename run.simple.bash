@@ -47,7 +47,7 @@ export WRITE_CONCERN=SAFE
 export MONGO_SERVER=localhost
 
 # port of the server to connect to
-export MONGO_PORT=40000
+export MONGO_PORT=27017
 
 # display performance information every time the client application inserts this many documents
 #   valid values : integer > 0, set to -1 if using NUM_SECONDS_PER_FEEDBACK
